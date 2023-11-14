@@ -142,4 +142,7 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+# Sequelize-auto 파일 감추기
+orm.js
+
 # End of https://www.toptal.com/developers/gitignore/api/node
