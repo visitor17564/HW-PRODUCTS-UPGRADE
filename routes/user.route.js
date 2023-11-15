@@ -86,17 +86,9 @@ router.post("/login", async (req, res) => {
 });
 
 // 사용자 정보 조회 API
-router.get("/users/:id", authMiddleware, async (req, res) => {
+router.get("/my_page", authMiddleware, async (req, res) => {
   try {
-    console.log(res.local.user);
-    const { id } = res.local.user;
-    const user = await Users.findOne({
-      attributes: ["id", "email", "createdAt", "updatedAt"],
-      where: {
-        id: id
-      }
-    });
-    return res.status(200).json({ data: user });
+    return res.status(200).json({ data: res.locals.user });
   } catch (err) {
     console.log(err);
   }
