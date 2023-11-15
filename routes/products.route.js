@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-const Products = require("../schemas/products.schema.js"); // 스키마 연결
 const authMiddleware = require("../middlewares/auth-middleware.js");
 // /api/products
 // 상품 목록 조회 API
