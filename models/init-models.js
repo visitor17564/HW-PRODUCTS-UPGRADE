@@ -8,13 +8,13 @@ function initModels(sequelize) {
   var SequelizeMeta = _SequelizeMeta(sequelize, DataTypes);
   var Users = _Users(sequelize, DataTypes);
 
-  Products.belongsTo(Users, { as: "author_User", foreignKey: "author" });
-  Users.hasMany(Products, { as: "Products", foreignKey: "author" });
+  Products.belongsTo(Users, { as: "author_User", foreignKey: "author"});
+  Users.hasMany(Products, { as: "Products", foreignKey: "author"});
 
   return {
     Products,
     SequelizeMeta,
-    Users
+    Users,
   };
 }
 module.exports = initModels;
