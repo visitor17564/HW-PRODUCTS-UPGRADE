@@ -1,9 +1,10 @@
 const express = require("express");
+const { Users } = require("../models");
 const router = express.Router();
 
 // 회원가입 API
-router.post("/users", async (req, res) => {
-  const { email, name, password, confirmPassword } = req.body;
+router.post("/signup", async (req, res) => {
+  const { email, name, password, passwordConfirm } = req.body;
   // StatusCode: 400 - 이메일 정보가 없는 경우
   if (!email) {
     res.status(400).json({
@@ -29,7 +30,7 @@ router.post("/users", async (req, res) => {
   }
 
   // StatusCode: 400 - 비밀번호가 6자 미만임
-  if (password.length <= 6) {
+  if (password.length < 6) {
     res.status(400).json({
       errorMessage: "패스워드는 6자 이상이어야 합니다."
     });
@@ -37,15 +38,14 @@ router.post("/users", async (req, res) => {
   }
 
   // StatusCode: 400 - 비밀번호가 비밀번호확인과 불일치
-  if (password !== confirmPassword) {
+  if (password !== passwordConfirm) {
     res.status(400).json({
       errorMessage: "비밀번호가 비밀번호확인과 불일치합니다."
     });
     return;
   }
 
-  const user = new User({ email, name, password });
-  await user.save();
+  const user = await Users.create({ email, name, password });
 
   res.status(200).json({
     success: true,
@@ -72,6 +72,24 @@ router.post("/login", async (req, res) => {
   );
   res.cookie("authorization", `Bearer ${token}`);
   return res.status(200).json({ message: "로그인 성공" });
+});
+
+// 사용자 정보 조회 API
+router.get("/users/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await Users.findOne({
+    attributes: ["userId", "email", "createdAt", "updatedAt"],
+    include: [
+      {
+        model: UserInfos, // 1:1 관계를 맺고있는 UserInfos 테이블을 조회합니다.
+        attributes: ["name", "age", "gender", "profileImage"]
+      }
+    ],
+    where: { userId }
+  });
+
+  return res.status(200).json({ data: user });
 });
 
 module.exports = router;

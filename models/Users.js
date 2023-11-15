@@ -21,19 +21,12 @@ module.exports = function (sequelize, DataTypes) {
       password: {
         type: DataTypes.STRING(255),
         allowNull: false
-      },
-      passwordConfirm: {
-        type: DataTypes.STRING(255),
-        allowNull: false
       }
     },
     {
       sequelize,
       tableName: "Users",
       timestamps: true,
-      hooks: {
-        validationFailed: (instance, options, error) => {}
-      },
       indexes: [
         {
           name: "PRIMARY",

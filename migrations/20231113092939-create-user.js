@@ -28,10 +28,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      passwordConfirm: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

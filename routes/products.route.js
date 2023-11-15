@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const Products = require("../schemas/products.schema.js"); // 스키마 연결
-
+const authMiddleware = require("../middlewares/auth-middleware.js");
 // /api/products
-//상품 목록 조회 API
+// 상품 목록 조회 API
 router.get("/products", async (req, res) => {
   try {
     const data = await Products.find().sort({ createdAt: -1 });
@@ -18,7 +18,7 @@ router.get("/products", async (req, res) => {
 // 전체조회는 products로, 상세조회, 등록, 변경, 삭제는 product로 작성
 
 // 상품 등록 API
-router.post("/product", async (req, res) => {
+router.post("/product", authMiddleware, async (req, res) => {
   try {
     const { title, content, author, password } = req.body;
     if (title === undefined || content === undefined || author === undefined || password === undefined) {
@@ -67,7 +67,7 @@ router.get("/product/:_id", async (req, res) => {
 
 // 상품 수정 API
 // _id값이 없으면 그냥 /product/페이지니까 바로 메시지 반환
-router.put("/product/", async (req, res) => {
+router.put("/product/", authMiddleware, async (req, res) => {
   return res.status(400).json({
     success: false,
     errorMessage: "데이터 형식이 올바르지 않습니다."
@@ -117,7 +117,7 @@ router.put("/product/:_id", async (req, res) => {
 
 // 상품 삭제 API
 // _id값이 없으면 그냥 /product/페이지니까 바로 메시지 반환
-router.delete("/product/", async (req, res) => {
+router.delete("/product/", authMiddleware, async (req, res) => {
   return res.status(400).json({
     success: false,
     errorMessage: "데이터 형식이 올바르지 않습니다."
