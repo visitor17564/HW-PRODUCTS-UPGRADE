@@ -1,7 +1,91 @@
-## API 명세서
+# 환경변수
 
-https://docs.google.com/spreadsheets/d/1k7HfSb0G5ZojfaqPt0wVbWzqTenOKkac_xxHkEDWAGY/edit?usp=sharing
+- .env 파일에 어떤 환경변수가 추가되어야 하는지 작성합니다.
+- key=value 형태에서 key만 나열합니다. value는 비밀!
 
-## ERD
+- DB_URL = instanceUserHost
+- JWT_SECRET = tokenKey
+- DBinstance
+- instanceUserId
+- instanceUserPw
+- instanceUserDatabase
 
-https://www.erdcloud.com/p/jmxcsgtJLSg5eGpJL
+# API 명세서 URL
+
+- https://docs.google.com/spreadsheets/d/1k7HfSb0G5ZojfaqPt0wVbWzqTenOKkac_xxHkEDWAGY/edit?usp=sharing
+
+# ERD URL
+
+- https://www.erdcloud.com/p/jmxcsgtJLSg5eGpJL
+
+# 더 고민해 보기
+
+1. **암호화 방식**
+
+- 비밀번호를 DB에 저장할 때 Hash를 이용했는데, Hash는 `단방향 암호화`와 `양방향 암호화` 중 어떤 암호화 방식에 해당할까요?
+  = 단방향 암호화입니다. 암호화는되지만 복호화가 안됩니다.
+- 비밀번호를 그냥 저장하지 않고 Hash 한 값을 저장 했을 때의 좋은 점은 무엇인가요?
+  = 데이터유출시 보안이슈를 방어해주며 암호화방식을 salt함으로써 추가적인 공격을 방지합니다.
+
+2. **인증 방식**
+
+- JWT(Json Web Token)을 이용해 인증 기능을 했는데, 만약 Access Token이 노출되었을 경우 발생할 수 있는 문제점은 무엇일까요?
+  = 액세스토큰이 유효한동안은 그 사용자정보로 서버의 정보에 접근 가능합니다.
+- 해당 문제점을 보완하기 위한 방법으로는 어떤 것이 있을까요?
+  = 비교적 유효기간이 짧은 액세스토큰을 배포하고 유효기간만료시 다시 액세스토큰을 받을 수 있는 리프레시토큰을 비교적 유효기간이 길게 설정해서 배포합니다.
+
+3. **인증과 인가**
+
+- 인증과 인가가 무엇인지 각각 설명해 주세요.
+  = 인증은 사용자의 신원을 검증하는 행위이며 인가는 인증된 사용자에게 특정 권한을 부여하는 것입니다.
+- 과제에서 구현한 Middleware는 인증에 해당하나요? 인가에 해당하나요? 그 이유도 알려주세요.
+  = 인증입니다. 미들웨어를 통과하지 못하면 특정 요청에 대해 라우터에서 사용권한을 부여하지 않습니다. 즉 미들웨어를 통과해야만 권한이 부여되기에 그 통과 자체가 인증입니다.
+
+4. **Http Status Code**
+
+- 과제를 진행하면서 `사용한 Http Status Code`를 모두 나열하고, 각각이 `의미하는 것`과 `어떤 상황에 사용`했는지 작성해 주세요.
+  = 200 OK 요청이 성공해서 결과문이 전송될 때 씁니다.
+  = 201 Created 요청결과 새 리소스가 생겼을 때 씁니다.
+  = 204 No Content 삭제, 수정이 일어나면 굳이 삭제된 내용반환하느라 트래픽낭비 안하고 요거 반환합니다.
+  = 400 Bad Request 요청 자체가 문제가있거나 유효하지 않을 때 씁니다.
+  = 401 Unauthorized 미들웨어에서 인증되지 않았을 때 즉, 요청자의 인증이 필요할 때 씁니다. 또한 아이디, 비밀번호가 틀렸을때도 씁니다.
+  = 403 Forbidden 클라이언트가 인증은 되었으나 컨텐츠에 액세스권한이 없을 때 씁니다.
+  = 404 Not Found 요청된 리소스가 없을 때 씁니다.
+  = 409 Conflict 요청리소스가 기존리소스와 충돌할 때 씁니다.(email중복 등)
+  = 500 Internal Server Error 예기치 못한 오류로 주로 catch(err)에 썼습니다.
+
+5. **리팩토링**
+
+- MongoDB, Mongoose를 이용해 구현되었던 코드를 MySQL, Sequelize로 변경하면서, 많은 코드 변경이 있었나요? 주로 어떤 코드에서 변경이 있었나요?
+  = find부분을 sequelize에 맞게 수정했습니다.
+  = SqlDB임에 따라 model부분의 속성에 association부분을 추가했습니다.
+- 만약 이렇게 DB를 변경하는 경우가 또 발생했을 때, 코드 변경을 보다 쉽게 하려면 어떻게 코드를 작성하면 좋을 지 생각나는 방식이 있나요? 있다면 작성해 주세요.
+  = 최대한 DB변경을 막습니다.
+  = 그래도 해야한다면 프로그래밍에서 DB를 편하게 쓰게 해주는 ODM, ORM 사용법에 익숙해지면 될것 같습니다.
+
+6. **서버 장애 복구**
+
+- 현재는 PM2를 이용해 Express 서버의 구동이 종료 되었을 때에 Express 서버를 재실행 시켜 장애를 복구하고 있습니다. 만약 단순히 Express 서버가 종료 된 것이 아니라, AWS EC2 인스턴스(VM, 서버 컴퓨터)가 재시작 된다면, Express 서버는 재실행되지 않을 겁니다. AWS EC2 인스턴스가 재시작 된 후에도 자동으로 Express 서버를 실행할 수 있게 하려면 어떤 조치를 취해야 할까요?
+  (Hint: PM2에서 제공하는 기능 중 하나입니다.)
+  = PM2를 실행한 후에
+  = pm2 save로 현재상태를 저장하고
+  = pm2 startup으로 현재성태를 자동 재시작하도록 설정해야합니다.
+
+7. **개발 환경**
+
+- nodemon은 어떤 역할을 하는 패키지이며, 사용했을 때 어떤 점이 달라졌나요?
+  = 코드가 수정되었을 때 치명적 error가 나는 상황이 아니라면 자동으로 서버를 재시작해줍니다.
+  = 만약 노드몬마저 팅기면 큰일난거구나 하면서 마음을 다잡게 해줬습니다.
+- npm을 이용해서 패키지를 설치하는 방법은 크게 일반, 글로벌(`--global, -g`), 개발용(`--save-dev, -D`)으로 3가지가 있습니다. 각각의 차이점을 설명하고, nodemon은 어떤 옵션으로 설치해야 될까요?
+  1. 일반
+  - dependencies 목록 추가
+  - 패키지 설치됨
+  - 다른사람이 clone 후 npm i 하면 패키지 설치됨
+  2. dev(-d, 개발용)
+  - devDependencies 목록 추가
+  - 패키지 설치됨
+    - 다른사람이 clone 후 npm i 하면 패키지 설치안됨
+  3. global(-g)
+  - 목록추가안됨
+  - 패키지만 설치됨
+  - 목록에없으므로 다른사람도 설치안됨
