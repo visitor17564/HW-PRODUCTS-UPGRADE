@@ -26,6 +26,7 @@ router.post("/signup", async (req, res) => {
     // 이메일 정보가 없는 경우
     if (!email) {
       res.status(400).json({
+        success: false,
         errorMessage: "이메일 입력이 필요합니다."
       });
       return;
@@ -35,6 +36,7 @@ router.post("/signup", async (req, res) => {
     const validateEmail = validator.isEmail(email);
     if (!validateEmail) {
       res.status(400).json({
+        success: false,
         errorMessage: "이메일이 형식에 맞지 않습니다."
       });
       return;
@@ -45,6 +47,7 @@ router.post("/signup", async (req, res) => {
     if (existsUsers) {
       // NOTE: 보안을 위해 인증 메세지는 자세히 설명하지 않습니다.
       res.status(409).json({
+        success: false,
         errorMessage: "이메일이 이미 사용중입니다."
       });
       return;
@@ -53,13 +56,15 @@ router.post("/signup", async (req, res) => {
     // 비밀번호가 6자 미만임
     if (password.length < 6) {
       return res.status(400).json({
-        errorMessage: "패스워드는 6자 이상이어야 합니다."
+        success: false,
+        errorMessage: "비밀번호는 6자 이상이어야 합니다."
       });
     }
 
     // 비밀번호가 비밀번호확인과 불일치
     if (password !== passwordConfirm) {
       return res.status(400).json({
+        success: false,
         errorMessage: "비밀번호가 비밀번호확인과 불일치합니다."
       });
     }
@@ -92,7 +97,7 @@ router.post("/login", async (req, res) => {
     // 이메일이 일치하는 사용자가 없을 때
     const user = await Users.findOne({ where: { email } });
     if (!user) {
-      return res.status(401).json({ message: "존재하지 않는 이메일입니다." });
+      return res.status(401).json({ success: false, message: "존재하지 않는 이메일입니다." });
     }
 
     // 비밀번호가 일치하지 않을 때
@@ -100,7 +105,7 @@ router.post("/login", async (req, res) => {
     const hash = user.password;
     const isValidPass = await comparePassword(password, hash);
     if (!isValidPass) {
-      return res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
+      return res.status(401).json({ success: false, message: "비밀번호가 일치하지 않습니다." });
     }
 
     // token발행 : payload=id, 유효기간 12h
@@ -114,7 +119,7 @@ router.post("/login", async (req, res) => {
 
     // 쿠키에담기
     res.cookie("authorization", `Bearer ${token}`);
-    return res.status(200).json({ message: "로그인 성공" });
+    return res.status(200).json({ success: true, message: "로그인 성공" });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);

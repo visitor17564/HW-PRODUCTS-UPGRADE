@@ -21,7 +21,7 @@ router.post("/product", authMiddleware, async (req, res) => {
 
     // 유효성검사 통과시 상품등록
     await Products.create({ title, content, author: id });
-    res.status(200).json({ success: true, Message: "판매 상품을 등록하였습니다." });
+    res.status(201).json({ success: true, Message: "판매 상품을 등록하였습니다." });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);
@@ -43,7 +43,7 @@ router.get("/products", async (req, res) => {
       ],
       order: [["createdAt", "DESC"]]
     });
-    res.status(200).json({ data: products });
+    res.status(200).json({ success: true, data: products });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);
@@ -92,7 +92,7 @@ router.get("/product/:productId", async (req, res) => {
     }
 
     // 아니면 그냥 data호출
-    res.status(200).json({ data: product });
+    res.status(200).json({ success: true, data: product });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);
@@ -163,7 +163,7 @@ router.put("/product/:productId", authMiddleware, async (req, res) => {
         }
       } // title과 content 컬럼을 수정합니다.
     );
-    res.status(204).json({ message: "상품 정보를 수정하였습니다." });
+    res.status(204).json({ success: true, message: "상품 정보를 수정하였습니다." });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);
@@ -220,7 +220,7 @@ router.delete("/product/:productId", authMiddleware, async (req, res) => {
         productId: productId
       }
     });
-    res.status(204).json({ message: "상품을 삭제하였습니다." });
+    res.status(204).json({ success: true, message: "상품을 삭제하였습니다." });
   } catch (err) {
     res.status(500).json({ success: false, Message: "예기치 못한 오류가 발생하였습니다." });
     console.log(err);
