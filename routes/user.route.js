@@ -108,7 +108,7 @@ router.post("/login", async (req, res) => {
         id: user.id
       },
       "product_upgrade_secret_key",
-      { expiresIn: "1h" }
+      { expiresIn: "1s" }
     );
     res.cookie("authorization", `Bearer ${token}`);
     return res.status(200).json({ message: "로그인 성공" });
