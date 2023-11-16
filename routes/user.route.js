@@ -4,6 +4,23 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/auth-middleware.js");
 
+// 비밀번호 hash 라이브러리, 함수선언
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
+// 비밀번호 확인, 함수선언
+const comparePassword = async (password, hash) => {
+  try {
+    // Compare password
+    return await bcrypt.compare(password, hash);
+  } catch (error) {
+    console.log(error);
+  }
+
+  // Return false if error
+  return false;
+};
+
 // 회원가입 API
 router.post("/signup", async (req, res) => {
   try {
@@ -48,7 +65,12 @@ router.post("/signup", async (req, res) => {
       return;
     }
 
-    await Users.create({ email, name, password });
+    // 비밀번호 hash
+    (async () => {
+      await bcrypt.hash(password, saltRounds, function (err, hash) {
+        Users.create({ email, name, password: hash });
+      });
+    })();
 
     res.status(200).json({
       success: true,
@@ -64,10 +86,18 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // 이메일이 일치하는 사용자가 없을 때
     const user = await Users.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({ message: "존재하지 않는 이메일입니다." });
-    } else if (user.password !== password) {
+    }
+
+    // 비밀번호가 일치하지 않을 때
+    // 비밀번호 hash 확인 함수선언
+    const hash = user.password;
+    const isValidPass = await comparePassword(password, hash);
+    if (!isValidPass) {
       return res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
     }
 
