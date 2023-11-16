@@ -9,7 +9,12 @@ const authMiddleware = require("../middlewares/auth-middleware.js");
 router.get("/products", async (req, res) => {
   try {
     const products = await Products.findAll({
-      // include: [{ model: Users, where: ["Products.author=Users.id"] }],
+      include: [
+        {
+          model: Users,
+          attributes: ["name", "id", "email"]
+        }
+      ],
       order: [["createdAt", "DESC"]]
     });
     res.json({ data: products });
@@ -58,6 +63,12 @@ router.get("/product/:productId", async (req, res) => {
     const { productId } = req.params;
     const product = await Products.findOne({
       attributes: ["productId", "author", "title", "content", "status", "createdAt", "updatedAt"],
+      include: [
+        {
+          model: Users,
+          attributes: ["name", "id", "email"]
+        }
+      ],
       where: {
         productId: productId
       }
