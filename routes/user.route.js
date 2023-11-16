@@ -4,6 +4,9 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/auth-middleware.js");
 
+// validator
+var validator = require("validator");
+
 // 비밀번호 hash 라이브러리, 함수선언
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
@@ -11,13 +14,10 @@ const saltRounds = 10;
 // 비밀번호 확인, 함수선언
 const comparePassword = async (password, hash) => {
   try {
-    // Compare password
     return await bcrypt.compare(password, hash);
   } catch (error) {
     console.log(error);
   }
-
-  // Return false if error
   return false;
 };
 
@@ -34,10 +34,13 @@ router.post("/signup", async (req, res) => {
     }
 
     // StatusCode: 400 - 이메일 정보가 형식에 맞지 않는경우
-    // validationFailed 완성해야함
-    // User.validationFailed(user => {
-
-    // })
+    const validateEmail = validator.isEmail(email);
+    if (!validateEmail) {
+      res.status(400).json({
+        errorMessage: "이메일이 형식에 맞지 않습니다."
+      });
+      return;
+    }
 
     // StatusCode: 409 - 중복 된 이메일인 경우
     const existsUsers = await Users.findOne({ where: { email } });
@@ -82,7 +85,6 @@ router.post("/signup", async (req, res) => {
 });
 
 // 로그인 API
-// 일단 쿠키로 해놓고 나중에 토큰으로 변경
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
