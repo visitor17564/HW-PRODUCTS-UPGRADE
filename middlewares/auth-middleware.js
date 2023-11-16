@@ -1,11 +1,14 @@
 const jwt = require("jsonwebtoken");
 const { Users } = require("../models");
 
+const env = require("dotenv");
+env.config();
+
 module.exports = async (req, res, next) => {
   try {
     const { authorization } = req.cookies;
     const [tokenType, token] = (authorization ?? "").split(" ");
-    const decodedToken = jwt.verify(token, "product_upgrade_secret_key");
+    const decodedToken = jwt.verify(token, process.env.tokenKey);
     const id = decodedToken.id;
     const user = await Users.findOne({ where: { id } });
     if (!user) {

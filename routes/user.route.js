@@ -4,6 +4,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middlewares/auth-middleware.js");
 
+// env파일 사용
+const env = require("dotenv");
+env.config();
+
 // validator
 var validator = require("validator");
 
@@ -107,8 +111,8 @@ router.post("/login", async (req, res) => {
       {
         id: user.id
       },
-      "product_upgrade_secret_key",
-      { expiresIn: "1s" }
+      process.env.tokenKey,
+      { expiresIn: "12h" }
     );
     res.cookie("authorization", `Bearer ${token}`);
     return res.status(200).json({ message: "로그인 성공" });
